@@ -19,7 +19,7 @@ struct DummyGB {
     struct LR35902 cpu;
     unsigned char io[0x80];
     unsigned char oam[0xA0];
-	unsigned char hram[0x80];
+    unsigned char hram[0x80];
     unsigned char wram[2][0x1000];
     unsigned char vram[0x2000];
     unsigned short timer_cycles;
@@ -48,9 +48,9 @@ static void update_rom_banks(struct DummyGB* gb) {
 static void dummy_mbc1_write(struct DummyGB* gb, unsigned short addr, unsigned char value) {
     switch ((addr >> 12) & 0xF) {
     case 0x2: case 0x3:
-		gb->mbc._1.rom_bank = (value & 0x1F) + (!value);
-		update_rom_banks(gb);
-		break;
+        gb->mbc._1.rom_bank = (value & 0x1F) + (!value);
+        update_rom_banks(gb);
+        break;
     case 0x4: case 0x5:
         gb->mbc._1.rom_bank = (gb->mbc._1.rom_bank & 0x1F) | ((value & 224));
         update_rom_banks(gb);
@@ -73,22 +73,22 @@ static void dummy_timmer(struct DummyGB* gb, unsigned short cycles) {
 
     IO_DIV += cycles;
     if (IO_TAC & 0x04) {
-		gb->timer_cycles += cycles;
-		while ((gb->timer_cycles) >= TAC_FREQ[IO_TAC & 0x03]) {
-			gb->timer_cycles -= TAC_FREQ[IO_TAC & 0x03];
-			if (IO_TIMA == 0xFF) {
-				IO_TIMA = IO_TMA;
-				gb->io[0xF] |= 4;
-			} else {
-				IO_TIMA++;
-			}
-		}
+        gb->timer_cycles += cycles;
+        while ((gb->timer_cycles) >= TAC_FREQ[IO_TAC & 0x03]) {
+            gb->timer_cycles -= TAC_FREQ[IO_TAC & 0x03];
+            if (IO_TIMA == 0xFF) {
+                IO_TIMA = IO_TMA;
+                gb->io[0xF] |= 4;
+            } else {
+                IO_TIMA++;
+            }
+        }
 	}
 }
 
 unsigned char LR35902_read(void* user, unsigned short addr) {
     if (addr < 0xFE00) {
-		return ((struct DummyGB*)user)->mmap[(addr >> 12)][addr & 0x0FFF];
+        return ((struct DummyGB*)user)->mmap[(addr >> 12)][addr & 0x0FFF];
 	} else if (addr <= 0xFE9F) {
         return ((struct DummyGB*)user)->oam[addr & 0x9F];
     } else if (addr >= 0xFF00 && addr <= 0xFF7F) {
@@ -101,29 +101,29 @@ unsigned char LR35902_read(void* user, unsigned short addr) {
 
 void LR35902_write(void* user, unsigned short addr, unsigned char value) {
     if (addr < 0xFE00) {
-		switch ((addr >> 12) & 0xF) {
-		case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+        switch ((addr >> 12) & 0xF) {
+        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
             ((struct DummyGB*)user)->cart_write(((struct DummyGB*)user), addr, value);
             break;
-		case 0x8: case 0x9:
-			((struct DummyGB*)user)->vram[addr & 0x1FFF] = value;
-			break;
-		case 0xA: case 0xB:
-			break;
-		case 0xC:
-			((struct DummyGB*)user)->wram[0][addr & 0x0FFF] = value;
-			break;
-		case 0xD:
-			((struct DummyGB*)user)->wram[1][addr & 0x0FFF] = value;
-			break;
-		case 0xE:
-			((struct DummyGB*)user)->wram[0][addr & 0x0FFF] = value;
-			break;
-		case 0xF:
-			((struct DummyGB*)user)->wram[1][addr & 0x0FFF] = value;
-			break;
-		}
-	} else if (addr <= 0xFE9F) {
+        case 0x8: case 0x9:
+            ((struct DummyGB*)user)->vram[addr & 0x1FFF] = value;
+            break;
+        case 0xA: case 0xB:
+            break;
+        case 0xC:
+            ((struct DummyGB*)user)->wram[0][addr & 0x0FFF] = value;
+            break;
+        case 0xD:
+            ((struct DummyGB*)user)->wram[1][addr & 0x0FFF] = value;
+            break;
+        case 0xE:
+            ((struct DummyGB*)user)->wram[0][addr & 0x0FFF] = value;
+            break;
+        case 0xF:
+            ((struct DummyGB*)user)->wram[1][addr & 0x0FFF] = value;
+            break;
+        }
+    } else if (addr <= 0xFE9F) {
         ((struct DummyGB*)user)->oam[addr & 0x9F] = value;
     } else if (addr >= 0xFF00 && addr <= 0xFF7F) {
         ((struct DummyGB*)user)->io[addr & 0x7F] = value;
@@ -155,11 +155,11 @@ int main(int argc, char** argv) {
 
     update_rom_banks(&gb);
     gb.mmap[0x8] = gb.vram + 0x0000;
-	gb.mmap[0x9] = gb.vram + 0x1000;
-	gb.mmap[0xC] = gb.wram[0];
-	gb.mmap[0xD] = gb.wram[1];
-	gb.mmap[0xE] = gb.wram[0];
-	gb.mmap[0xF] = gb.wram[1];
+    gb.mmap[0x9] = gb.vram + 0x1000;
+    gb.mmap[0xC] = gb.wram[0];
+    gb.mmap[0xD] = gb.wram[1];
+    gb.mmap[0xE] = gb.wram[0];
+    gb.mmap[0xF] = gb.wram[1];
 
     for (;;) {
         LR35902_run(&gb.cpu);
